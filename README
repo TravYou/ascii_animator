@@ -1,0 +1,23 @@
+Contributor: Zihao You
+
+Description: The project converts series of PNGs into txt files and play it on the linux terminal. It first converts PNGs to txt with executable `converter`. Then play it with executable `animator`. User can adjust the video width and height.
+
+Dependencies:
+1. C++ library libpng (http://www.libpng.org/pub/png/libpng.html)
+2. zlib (Only used as dependency for libpng)
+3. (Optional) ffmpeg (To convert video into png files)
+
+Setup:
+1. Clone the repository
+2. Run Makefile with make, this creates `converter` and `animator` executables
+3. Run ffmpeg to convert video into pngs files under ./<video_png_path>
+
+PNG-TXT conversion
+1. In linux terminal, run command `tput cols` and `tput lines` to know the char width(cols) and char height(lines) of your terminal
+2. Run command `./converter ./<video_png_path> ./<target_txt_path>`
+3. You will be prompted to enter the screen width and screen height; enter the value you get from 1)
+4. all txt files will be generated under ./<target_txt_path>
+
+TXT animation
+1. Use command `clear` to clear outputs from the terminal
+2. Run command `./animator ./<target_txt_path>` to start the animation

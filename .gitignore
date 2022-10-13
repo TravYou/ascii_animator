@@ -1,0 +1,8 @@
+*.o
+animator
+converter
+badapple/
+txtbadapple/
+smallsample/
+trainingset/
+.vscode
