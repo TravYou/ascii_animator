@@ -4,41 +4,71 @@
 #include "Exceptions.h"
 #include <filesystem>
 #include <string>
+#include <unistd.h>
+#include <sstream>
+#include <sys/ioctl.h>
+
 
 using std::cout;
 using std::cin;
 using std::cerr;
 using std::endl;
 using std::string;
+using std::stringstream;
 using std::filesystem::directory_iterator;
 using std::filesystem::exists;
 using std::filesystem::create_directory;
 using std::filesystem::remove_all;
 
+#define TIOCGWINSZ	0x5413
+
+
+
 int main(int argc, char ** argv){
-    std::cout << "started\n";
+    struct winsize size;
+    ioctl(STDOUT_FILENO, TIOCGWINSZ, &size);
     if (argc != 3) {
         std::cerr << "ERROR: Wrong argument number" << endl;
         return 0;
     }
-    std::cout << "started2\n";
-    int screenWidth;
-    int screenHeight;
-    std::cout << "started2\n";
+    string screenWidth;
+    string screenHeight;
+    int scrW, scrH;
     std::cout << "Please enter: screenWidth screenHeight\n";
-    std::cout << "started2\n";
     bool continueLoop = true;
     while (continueLoop) {
-        if(!(std::cin >> screenWidth >> screenHeight)) {
-            continueLoop = true;
-            continue;
-        }else if (screenHeight == 0 || screenWidth == 0) {
-            continueLoop = true;
-            continue;
-        }
         continueLoop = false;
+        if (cin >> screenWidth) {
+            if(!(stringstream(screenWidth) >> scrW)){
+                if (!screenWidth.compare("auto")){
+                    scrW = size.ws_col;
+                } else {
+                    continueLoop = true;
+                }
+            }
+        } else {
+            continueLoop = true;
+        }
+        if (cin >> screenHeight) {
+            if(!(stringstream(screenHeight) >> scrH)){
+                if (!screenHeight.compare("auto")){
+                    scrH = size.ws_row;
+                } else {
+                    continueLoop = true;
+                }
+            }
+        } else {
+            continueLoop = true;
+        }
+
+        if (scrW == 0 || scrH == 0) {
+            continueLoop = true;
+        }
+        if (continueLoop == true) {
+            cout << "ERROR: incorrect width and height";
+        }
     }
-    std::cout << screenWidth << ' ' << screenHeight << endl;
+    std::cout << "Width: " << scrW << ' ' << "Height: " << scrH << endl;
 
 
     string pngfiles{argv[1]};
@@ -63,7 +93,7 @@ int main(int argc, char ** argv){
         cout << pngfile.path() << endl;
         string filename{pngfile.path()};
         imgPng* pic = read_png_file(filename.c_str());
-        charDisplay *disp = readArrayToText(pic, screenWidth, screenHeight);
+        charDisplay *disp = readArrayToText(pic, scrW, scrH);
         filename.erase(filename.end()-4, filename.end());
         string newTxt{target};
         newTxt.append("/").append(pngfile.path().stem()).append(".txt");

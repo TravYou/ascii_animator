@@ -42,7 +42,6 @@ imgPng* read_png_file(const char* file_name) {
     png_byte color_type = png_get_color_type(png_ptr, info_ptr);
     png_byte bit_depth = png_get_bit_depth(png_ptr, info_ptr);
 
-    int number_of_passes = png_set_interlace_handling(png_ptr);
     png_read_update_info(png_ptr, info_ptr);
 
 
@@ -65,17 +64,17 @@ imgPng* read_png_file(const char* file_name) {
     img_ptr->width = width;
     img_ptr->bit_depth = bit_depth;
     img_ptr->color_type = color_type;
-    printf("pngwidth: %d, pngheight: %d\n", width, height);
+    //printf("pngwidth: %d, pngheight: %d\n", width, height);
 
     fclose(fp);
     return img_ptr;
 
 }
 
-charDisplay* readArrayToText(imgPng* img_ptr, int displayWidth, int displayHeight) {\
+charDisplay* readArrayToText(imgPng* img_ptr, int displayWidth, int displayHeight) {
     double heightShrinkRatio = (double) img_ptr->height / displayHeight;
     double widthShrinkRatio = (double)img_ptr->width / displayWidth;
-    std::cout << widthShrinkRatio << ' '<< heightShrinkRatio << '\n';
+    //std::cout << widthShrinkRatio << ' '<< heightShrinkRatio << '\n';
     double currH = 0;
     double currW = 0;
     charDisplay* pic = new charDisplay;
@@ -146,7 +145,12 @@ void writeTextToFile(const char * file_name, charDisplay* display) {
 
 void freeAll(imgPng *img, charDisplay* display) {
     for (int h = 0; h < img->height; h++) {
-        delete img->rowpointers[h];
+        free(img->rowpointers[h]);
     }
-    delete display->data;
+    free(img->rowpointers);
+    png_destroy_read_struct(&img->png_ptr, &img->info_ptr, nullptr);
+    delete img;
+
+    delete[] display->data;
+    delete display;
 }
